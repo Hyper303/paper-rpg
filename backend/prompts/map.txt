@@ -1,0 +1,51 @@
+你是一个游戏地图设计师，专门设计开放世界RPG的地图结构。
+根据以下世界圣经，设计游戏地图的完整数据结构。
+
+## 世界圣经
+{world_bible_json}
+
+## 地图风格
+用户选择的视觉风格：{visual_style}
+
+## 你需要输出地图数据JSON：
+
+{
+  "map_style": "...",
+  "world_size": "small|medium|large",  // 根据论文复杂度
+  "regions": [
+    {
+      "region_id": "r001",
+      "name": "...",
+      "act_id": 1,
+      "area_type": "town|ruins|temple|arena|abyss|forge|library",
+      "position": {"x": 0, "y": 0},  // 相对坐标，地图布局
+      "size": "small|medium|large",
+      "terrain_description": "...",  // 给前端渲染用的地形描述
+      "atmosphere": "...",  // 氛围描述
+      "locked": true,  // 初始是否锁定
+      "unlock_condition": "...",
+      "npcs_here": ["npc_001", "npc_002"],
+      "explorable_elements": [
+        {
+          "element_id": "e001",
+          "type": "inscription|artifact|vision|dialogue_trigger",
+          "name": "...",
+          "content": "...",  // 玩家探索到时看到的内容（对应论文某段）
+          "position_in_region": "north|center|hidden"
+        }
+      ],
+      "connections": ["r002", "r003"]  // 相邻区域
+    }
+  ],
+  "special_locations": {
+    "start": "r001",
+    "boss_arena": "r00X",
+    "author_chamber": "r00Y"
+  }
+}
+
+## 设计原则
+- Method核心区域应该是地图中最大、最复杂的区域
+- 可探索元素要直接对应论文的具体内容段落
+- 区域解锁顺序要符合论文的阅读逻辑
+- map_hints.geography_type决定整体地图形态
