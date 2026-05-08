@@ -169,3 +169,5 @@ Or use the convenience script from the repo root:
 Hosted on [Railway](https://railway.app). Two-stage Docker build: Node builds the frontend static files, Python serves everything via FastAPI. Push to `main` triggers automatic redeploy.
 
 Set `DEEPSEEK_API_KEY` in the Railway service's Variables panel.
+
+You can also access through https://paper-rpg-production.up.railway.app/ .
