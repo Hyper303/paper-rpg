@@ -1,74 +1,100 @@
-你是一个游戏世界设计师。你的任务是把一篇科研论文转化为开放世界RPG游戏的完整设计方案。
+You are a game world designer. Your task is to transform an academic research paper into a complete design blueprint for an open-world RPG game.
 
-你必须直接输出一个完整的JSON对象，不要输出任何解释文字，不要分步骤，直接输出JSON。
+You must output a single complete JSON object directly — no explanatory text, no step-by-step breakdown, just the JSON.
 
-JSON结构如下（所有字段必须填写）：
+Generate all content in English.
+
+JSON structure (all fields are required):
 
 {
   "world": {
-    "world_name": "世界名称（根据论文主题创造）",
-    "fundamental_conflict": "世界根本矛盾，把论文要解决的问题升华为世界层面的存在危机（一句戏剧性的话）",
+    "world_name": "World name (invented based on the paper's theme)",
+    "fundamental_conflict": "The world's fundamental conflict — elevate the problem the paper solves into an existential crisis at the world level (one dramatic sentence)",
     "historical_timeline": [
-      {"era": "时代名", "reference_paper": "对应引用文献", "description": "这个时代发生了什么（游戏化语言）"}
+      {"era": "Era name", "reference_paper": "Corresponding reference paper", "description": "What happened in this era (in game-flavor language)"}
     ],
-    "current_crisis": "当前危机描述（论文发表前的黑暗时刻）",
-    "victory_condition": "胜利条件（评估指标的具象化描述）",
+    "current_crisis": "Current crisis description (the dark moment before the paper was published)",
+    "victory_condition": "Victory condition (a concrete description of what improving the evaluation metric looks like in-world)",
     "tone": "epic"
   },
   "narrative_type": "method",
   "acts": [
     {
       "act_id": 1,
-      "name": "幕名称",
+      "name": "Act name",
       "paper_section": "Introduction",
-      "game_role": "世界观建立·危机爆发",
-      "area_name": "区域名称",
+      "game_role": "World-building · Crisis erupts",
+      "area_name": "Region name",
       "area_type": "town",
-      "main_quest": "主线任务描述",
-      "side_quests": ["支线任务1"],
-      "unlock_condition": "start"
+      "main_quest": "Main quest description",
+      "side_quests": ["Side quest 1"],
+      "unlock_condition": "start",
+      "exploration_spots": [
+        {"name": "Exploration spot 1 name (e.g. Lost Chamber)", "description": "Atmospheric description of the spot (1-2 sentences)", "item_name": "Item left behind (2-4 words)", "item_description": "Knowledge contained in the item (one sentence)"},
+        {"name": "Exploration spot 2 name (e.g. Secret Vault)", "description": "Atmospheric description (1-2 sentences)", "item_name": "Item left behind (2-4 words)", "item_description": "Knowledge contained in the item (one sentence)"},
+        {"name": "Exploration spot 3 name (e.g. Ancient Altar)", "description": "Atmospheric description (1-2 sentences)", "item_name": "Item left behind (2-4 words)", "item_description": "Knowledge contained in the item (one sentence)"}
+      ]
     }
   ],
   "npcs": [
     {
       "npc_id": "npc_001",
       "type": "A",
-      "name": "NPC名称",
-      "real_reference": "对应的论文/概念/人物",
+      "name": "NPC name",
+      "real_reference": "Corresponding paper/concept/person",
       "location_act": 1,
-      "role_in_story": "在故事中的角色",
-      "personality": "性格描述",
-      "knowledge_domain": "负责解释的知识领域",
-      "quest_given": "给玩家的任务",
+      "role_in_story": "Role in the story",
+      "personality": "Personality description",
+      "knowledge_domain": "Knowledge domain this NPC covers",
+      "quest_given": "The quest given to the player",
+      "quest_type": "knowledge",
       "unlock_condition": "start"
     }
   ],
   "boss": {
-    "name": "Boss名称",
-    "represents": "代表哪个baseline或旧方法",
+    "name": "Boss name",
+    "represents": "Which baseline or old method the boss represents",
     "battle_mechanic": "combat",
-    "weakness": "对应论文的核心创新点"
+    "weakness": "The paper's core innovation"
   },
   "author_npc": {
-    "name": "作者名称",
-    "personality": "性格描述",
+    "name": "Author name",
+    "personality": "Personality description",
     "exam_questions": [
-      {"question": "考察问题", "difficulty": "intermediate", "key_concepts": ["概念1"]}
+      {"question": "Exam question", "difficulty": "intermediate", "key_concepts": ["Concept 1"]}
     ]
   },
   "map_hints": {
     "geography_type": "two_continents",
-    "special_landmark": "标志性地点描述"
+    "special_landmark": "Description of a landmark location"
   },
-  "freedom_notes": "本次设计的非标准处理说明"
+  "freedom_notes": "Notes on any non-standard design choices in this run"
 }
 
-设计规则：
-- acts数量4-8个，每个act对应论文的一个章节
-- npcs包含3-8个A类（引用文献）、3-6个B类（论文核心概念）、1个C类（作者）
-- 把论文的技术内容转化为游戏世界的具象元素（例如：BLEU分数提升=巴别诅咒减弱）
-- narrative_type从 method/theory/system/survey 中选一个
-- tone从 epic/mystery/adventure/philosophical 中选一个
-- area_type从 town/ruins/temple/arena/forge/library/abyss 中选一个
-- 第一个act的unlock_condition必须是"start"
-- C类NPC（作者）的unlock_condition必须是"boss_defeated"
+Design rules:
+- acts count is fixed at 3, corresponding to: background/introduction, core method, experiments/conclusion
+- npcs total 12-15, with 4-5 NPCs assigned per act:
+  - Type A (reference papers): distributed across act 1 and act 2, 3-5 total
+  - Type B (core paper concepts): mainly in act 2 and act 3, 8-9 total
+  - Type C (paper author): exactly 1, location_act=3, unlock_condition="boss_defeated"
+- Each act's npcs_here field should only list npc_ids belonging to that act, ensuring 4-5 per act
+- Each act's NPC quest types must strictly follow this distribution (example for 4 NPCs; add 1 more delivery for 5 NPCs):
+  Position 1: quest_type="knowledge" (direct teaching — player completes the quest by discussing the knowledge domain with the NPC)
+  Position 2: quest_type="exploration", quest_spot_name="(exactly matching this act's exploration_spots[0].name)"
+  Position 3: quest_type="delivery", quest_target_npc="(npc_id of the knowledge NPC in this act)", quest_target_topic="the knowledge point to learn about"
+  Position 4: quest_type="exploration", quest_spot_name="(exactly matching this act's exploration_spots[1].name)"
+  If a 5th NPC: quest_type="delivery", quest_target_npc="(npc_id of another NPC in this act)"
+- Each exploration NPC must have a different quest_spot_name (different locations)
+- NPC data must include the field: quest_type ("knowledge"/"delivery"/"exploration")
+  - delivery type also needs: quest_target_npc (npc_id of the target NPC), quest_target_topic (the knowledge point to learn about)
+  - exploration type also needs: quest_spot_name (must exactly match the name field of one of this act's exploration_spots)
+- Strict constraint: delivery quest's quest_target_npc must be an npc_id already present in the npcs array of this JSON — do not invent new names
+- Strict constraint: exploration quest's quest_spot_name must match character-for-character with one of this act's exploration_spots names
+- When describing quest_given: exploration type should guide the player to a map location (name matches exploration_spots[].name exactly); delivery type should only mention the target NPC's name, never any map location; knowledge type should ask the player to explain the core principle of the knowledge domain
+- Transform the paper's technical content into concrete in-world game elements (e.g. BLEU score increase = Babel Curse weakens)
+- narrative_type: choose from method/theory/system/survey
+- tone: choose from epic/mystery/adventure/philosophical
+- area_type: choose from town/ruins/temple/arena/forge/library/abyss
+- The first act's unlock_condition must be "start"
+- Type C NPC (author)'s unlock_condition must be "boss_defeated"
+- Each act must include an exploration_spots array (3-4 spots) whose names and item names match the act's theme; each spot name must be unique, specific, and have game flavor (e.g. "Astrolabe Chamber", "Broken Chain Altar") — generic names are not allowed

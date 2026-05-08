@@ -48,7 +48,7 @@ class LLMClient:
             # rely on prompt instruction instead
             input_text = user
             if json_mode:
-                input_text = user + "\n\n请直接输出JSON对象，不要任何解释文字，不要markdown代码块。"
+                input_text = user + "\n\nOutput a JSON object directly — no explanatory text, no markdown code blocks."
             resp = self.client.responses.create(
                 model=self.model,
                 instructions=system,
@@ -114,13 +114,26 @@ def _extract_json(text: str) -> dict:
     except json.JSONDecodeError:
         pass
 
+    # Handle double-brace format {{...}} that some models output when mimicking prompt examples
+    if text.startswith('{{') or text.startswith('{{"'):
+        normalized = text.replace('{{', '{').replace('}}', '}')
+        try:
+            return json.loads(normalized)
+        except json.JSONDecodeError:
+            pass
+
     # Find the outermost {...} block
     start = text.find('{')
     end = text.rfind('}')
     if start != -1 and end > start:
+        candidate = text[start:end + 1]
         try:
-            return json.loads(text[start:end + 1])
+            return json.loads(candidate)
         except json.JSONDecodeError:
-            pass
+            # Try collapsing double braces in the candidate
+            try:
+                return json.loads(candidate.replace('{{', '{').replace('}}', '}'))
+            except json.JSONDecodeError:
+                pass
 
     return {}

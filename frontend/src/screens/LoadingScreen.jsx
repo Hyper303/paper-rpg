@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
 const STEPS = [
-  { key: 'director', label: '解析论文，构建世界圣经' },
-  { key: 'story_map', label: '生成叙事与地图' },
-  { key: 'npcs', label: '召唤 NPC 角色' },
-  { key: 'assembly', label: '整合世界，检查一致性' },
+  { key: 'director', label: 'Analyzing paper, building world bible' },
+  { key: 'story_map', label: 'Generating narrative and map' },
+  { key: 'npcs', label: 'Summoning NPC characters' },
+  { key: 'assembly', label: 'Assembling world, checking consistency' },
 ]
 
 const STATUS_COLOR = {
@@ -57,7 +57,7 @@ export default function LoadingScreen({ pdfFile, questionnaire, onReady }) {
               setStepStatus(prev => ({ ...prev, [parsed.step]: parsed.status }))
               setLog(prev => [...prev, `[${parsed.step}] ${parsed.status}`])
             } else if (event === 'world_bible') {
-              setLog(prev => [...prev, `世界圣经已生成：${parsed.world?.world_name || ''}`])
+              setLog(prev => [...prev, `World bible generated: ${parsed.world?.world_name || ''}`])
             } else if (event === 'complete') {
               onReady(parsed)
             } else if (event === 'error') {
@@ -77,7 +77,7 @@ export default function LoadingScreen({ pdfFile, questionnaire, onReady }) {
   return (
     <div style={{ maxWidth: 580, margin: '0 auto', padding: '80px 24px' }}>
       <h2 style={{ textAlign: 'center', color: '#ffd700', letterSpacing: 4, marginBottom: 48 }}>
-        正在构建你的世界...
+        Building your world...
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -99,7 +99,7 @@ export default function LoadingScreen({ pdfFile, questionnaire, onReady }) {
                 {step.label}
               </div>
               <div style={{ fontSize: 12, color: STATUS_COLOR[status] || '#444' }}>
-                {status === 'running' ? '生成中...' : status === 'done' ? '完成' : status === 'error' ? '错误' : ''}
+                {status === 'running' ? 'Generating...' : status === 'done' ? 'Done' : status === 'error' ? 'Error' : ''}
               </div>
             </div>
           )
@@ -111,7 +111,7 @@ export default function LoadingScreen({ pdfFile, questionnaire, onReady }) {
           marginTop: 32, padding: 16, background: 'rgba(248,113,113,0.1)',
           border: '1px solid #f87171', borderRadius: 6, color: '#f87171', fontSize: 13,
         }}>
-          错误：{error}
+          Error: {error}
         </div>
       )}
 

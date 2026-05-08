@@ -67,23 +67,23 @@ const S = {
 
 const FIELD_OPTIONS = {
   background: [
-    { value: 'novice', label: '新手 — 我对这个领域不熟悉' },
-    { value: 'intermediate', label: '中级 — 我有一定基础' },
-    { value: 'expert', label: '专家 — 我熟悉该领域' },
+    { value: 'novice', label: 'Novice — I\'m not familiar with this field' },
+    { value: 'intermediate', label: 'Intermediate — I have some background' },
+    { value: 'expert', label: 'Expert — I know this field well' },
   ],
   preference: [
-    { value: 'guided', label: '引导型 — 帮我一步步走' },
-    { value: 'self-directed', label: '自由探索型 — 我自己来' },
+    { value: 'guided', label: 'Guided — walk me through it step by step' },
+    { value: 'self-directed', label: 'Self-directed — I\'ll explore on my own' },
   ],
   time: [
-    { value: 'quick', label: '快速 — 30分钟以内' },
-    { value: 'normal', label: '普通 — 1-2小时' },
-    { value: 'deep', label: '深度 — 3小时以上' },
+    { value: 'quick', label: 'Quick — under 30 minutes' },
+    { value: 'normal', label: 'Normal — 1-2 hours' },
+    { value: 'deep', label: 'Deep dive — 3+ hours' },
   ],
   goal: [
-    { value: 'overview', label: '概览 — 了解大概' },
-    { value: 'deep-understanding', label: '深度理解 — 掌握细节' },
-    { value: 'paper-replication', label: '复现论文 — 动手实现' },
+    { value: 'overview', label: 'Overview — get the big picture' },
+    { value: 'deep-understanding', label: 'Deep understanding — master the details' },
+    { value: 'paper-replication', label: 'Replicate the paper — implement it myself' },
   ],
 }
 
@@ -119,7 +119,7 @@ export default function UploadScreen({ onStart }) {
     <div style={S.container}>
       <div>
         <h1 style={S.title}>PAPER RPG</h1>
-        <p style={S.subtitle}>将论文变成可探索的世界</p>
+        <p style={S.subtitle}>Turn any paper into an explorable world</p>
       </div>
 
       <div
@@ -147,8 +147,8 @@ export default function UploadScreen({ onStart }) {
         ) : (
           <div>
             <div style={{ fontSize: 28, marginBottom: 8 }}>⬆</div>
-            <div>点击或拖入论文 PDF</div>
-            <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>仅支持 PDF 格式</div>
+            <div>Click or drag a paper PDF here</div>
+            <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>PDF format only</div>
           </div>
         )}
       </div>
@@ -157,7 +157,7 @@ export default function UploadScreen({ onStart }) {
         {Object.entries(FIELD_OPTIONS).map(([key, opts]) => (
           <div key={key}>
             <label style={S.label}>{
-              { background: '你的领域背景', preference: '探索偏好', time: '可用时间', goal: '学习目标' }[key]
+              { background: 'Your background', preference: 'Exploration preference', time: 'Available time', goal: 'Learning goal' }[key]
             }</label>
             <select
               style={S.select}
@@ -173,7 +173,7 @@ export default function UploadScreen({ onStart }) {
       </div>
 
       <button style={S.btn(!file)} disabled={!file} onClick={handleSubmit}>
-        开始生成世界
+        Generate World
       </button>
     </div>
   )

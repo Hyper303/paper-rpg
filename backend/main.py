@@ -95,14 +95,16 @@ async def generate_world(
 @app.post("/api/npc-chat")
 async def npc_chat(body: NpcChatRequest):
     try:
-        reply = await run_npc_turn(
+        result = await run_npc_turn(
             npc_data=body.npc_data,
             message=body.message,
             history=body.history,
             player_profile=body.player_profile,
             world_bible=body.world_bible,
+            extra_context=body.extra_context,
+            force_complete=body.force_complete,
         )
-        return {"reply": reply}
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -131,34 +133,87 @@ async def init_game(body: dict):
 
 @app.post("/api/generate-quiz")
 async def generate_quiz(body: dict):
-    """Generate a multiple-choice question for a given act."""
+    """Generate multi-question quiz: one MC per NPC + one free-text question."""
     from models.llm_client import LLMClient, _extract_json
     client = LLMClient(provider="deepseek", model="deepseek-chat")
 
     act = body.get("act_data", {})
-    system = "你是教育游戏设计师，根据章节内容生成测验题目。只输出JSON，不要任何解释。"
-    user = f"""根据以下游戏章节，生成一道4选1的选择题，考察玩家对核心内容的理解。
+    npcs = body.get("npcs", [])
 
-章节名：{act.get('name', '')}
-主线任务：{act.get('main_quest', '')}
-支线任务：{act.get('side_quests', [])}
+    npc_lines = "\n".join(
+        f"- npc_id={n.get('npc_id','')} name={n.get('name','')} knowledge={n.get('knowledge_domain','')}"
+        for n in npcs
+    )
 
-输出JSON：
+    system = "You are an educational game quiz expert. Generate quiz questions based on the region info and NPC list. Output JSON only, no explanations."
+    user = f"""Region: {act.get('name','')}
+Main quest: {act.get('main_quest','')}
+
+NPC list (generate one multiple-choice question per NPC):
+{npc_lines}
+
+Output format:
 {{
-  "question": "问题文本（中文，考察章节核心概念）",
-  "options": {{"A": "选项A文本", "B": "选项B文本", "C": "选项C文本", "D": "选项D文本"}},
-  "correct": "A",
-  "explanation": "解释正确答案及核心知识点（2-3句话）"
-}}"""
+  "mc_questions": [
+    {{
+      "npc_id": "npc_001",
+      "npc_name": "NPC name",
+      "question": "A question about this NPC's knowledge domain (in English)",
+      "options": {{"A": "...", "B": "...", "C": "...", "D": "..."}},
+      "correct": "B",
+      "explanation": "Explanation of the correct answer (2 sentences)",
+      "wrong_hints": {{
+        "A": "First-person explanation from this NPC's perspective of why A is wrong (1 sentence)",
+        "C": "First-person explanation from this NPC's perspective of why C is wrong (1 sentence)",
+        "D": "First-person explanation from this NPC's perspective of why D is wrong (1 sentence)"
+      }}
+    }}
+  ],
+  "free_text": {{
+    "question": "An open-ended synthesis question asking the player to explain the region's core concepts in their own words",
+    "key_concepts": ["concept 1", "concept 2"],
+    "npc_insights": {{
+      "npc_001": "One hint from this NPC's first-person perspective",
+      "npc_002": "One hint from this NPC's first-person perspective"
+    }}
+  }}
+}}
+
+Requirements:
+- mc_questions: {len(npcs)} questions total, one per NPC
+- wrong_hints: provide hints for the 3 wrong options only, in the NPC's voice
+- npc_insights: provide hints for all NPCs
+- [Important] correct answers must be evenly distributed across A/B/C/D: no single letter appears more than {max(1, len(npcs)//4 + 1)} times in the full set, at least 3 different letters must be used; option text lengths should be similar so the correct answer isn't obvious from length"""
 
     try:
-        raw = await asyncio.to_thread(client.chat, system, user)
+        raw = await asyncio.to_thread(client.chat, system, user, True)
         result = _extract_json(raw)
-        if not result.get("question"):
-            raise ValueError("quiz generation returned empty")
+        if not result.get("mc_questions"):
+            raise ValueError("quiz generation failed")
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/evaluate-answer")
+async def evaluate_answer(body: dict):
+    """Evaluate a free-text answer against key concepts."""
+    from models.llm_client import LLMClient, _extract_json
+    client = LLMClient(provider="deepseek", model="deepseek-chat")
+
+    system = "You are a learning assessment expert. Be lenient: a student passes if they can express the core idea in their own words. Output JSON only."
+    user = f"""Question: {body.get('question','')}
+Key concepts: {', '.join(body.get('key_concepts', []))}
+Student answer: {body.get('answer','')}
+
+Output: {{"passed": true or false, "feedback": "Encouraging feedback that fills in any missing key points (2-3 sentences)"}}"""
+
+    try:
+        raw = await asyncio.to_thread(client.chat, system, user, True)
+        result = _extract_json(raw)
+        return result if result.get("feedback") else {"passed": True, "feedback": "Well understood — keep going!"}
+    except Exception:
+        return {"passed": True, "feedback": "Keep going!"}
 
 
 # Serve React frontend (must be last — catches all non-API routes)

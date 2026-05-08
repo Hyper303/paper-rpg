@@ -12,5 +12,5 @@ async def run_story(world_bible: dict) -> dict:
         world_bible_json=json.dumps(world_bible, ensure_ascii=False),
         tone=world_obj.get("tone", "epic"),
     )
-    user = "请根据以上游戏世界设计，输出完整的叙事内容JSON。直接输出JSON，不要任何解释。"
+    user = "Based on the game world design above, output the complete narrative content JSON. Output JSON directly, no explanations."
     return await asyncio.to_thread(story_client.chat_json, system, user)

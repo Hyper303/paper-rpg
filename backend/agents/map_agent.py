@@ -4,25 +4,25 @@ from models.llm_client import LLMClient
 
 map_client = LLMClient(provider="deepseek", model="deepseek-chat")
 
-_MAP_PROMPT = """你是RPG游戏地图设计师。根据以下游戏设计数据，生成地图的JSON数据。
+_MAP_PROMPT = """You are an RPG game map designer. Based on the following game design data, generate the map JSON data.
 
-直接输出JSON，格式如下，不要任何解释：
+Output JSON directly in the format below — no explanations:
 {{
   "map_style": "pixel_2d",
   "world_size": "medium",
   "regions": [
     {{
       "region_id": "r001",
-      "name": "区域名称",
+      "name": "Region name",
       "act_id": 1,
       "area_type": "town",
-      "terrain_description": "地形描述",
-      "atmosphere": "氛围描述",
+      "terrain_description": "Terrain description",
+      "atmosphere": "Atmosphere description",
       "locked": false,
       "unlock_condition": "start",
       "npcs_here": ["npc_001"],
       "explorable_elements": [
-        {{"element_id":"e001","type":"inscription","name":"元素名","content":"内容描述","position_in_region":"center"}}
+        {{"element_id":"e001","type":"inscription","name":"Element name","content":"Content description","position_in_region":"center"}}
       ],
       "connections": ["r002"]
     }}
@@ -34,13 +34,13 @@ _MAP_PROMPT = """你是RPG游戏地图设计师。根据以下游戏设计数据
   }}
 }}
 
-规则：
-- 每个act对应一个region，共{act_count}个region
-- area_type只能是：town/ruins/temple/arena/forge/library/abyss
-- 第一个region：locked=false，unlock_condition="start"
-- 其余region：locked=true，unlock_condition="previous_act_complete"
-- npcs_here填该区域NPC的npc_id
-- boss_arena是最后一个战斗区域，author_chamber是倒数第二个区域
+Rules:
+- One region per act, {act_count} regions total
+- area_type must be one of: town/ruins/temple/arena/forge/library/abyss
+- First region: locked=false, unlock_condition="start"
+- All other regions: locked=true, unlock_condition="previous_act_complete"
+- npcs_here lists the npc_id of every NPC in this region
+- boss_arena is the last combat region; author_chamber is the second-to-last region
 """
 
 
@@ -62,15 +62,31 @@ async def run_map(world_bible: dict, visual_style: str = "pixel_2d") -> dict:
     ]
 
     user = (
-        f"游戏世界名：{world_obj.get('world_name', '')}\n"
-        f"世界矛盾：{world_obj.get('fundamental_conflict', '')}\n\n"
-        f"章节列表：\n{json.dumps(acts_summary, ensure_ascii=False)}\n\n"
-        f"NPC列表：\n{json.dumps(npcs_summary, ensure_ascii=False)}\n\n"
-        f"请生成地图JSON，直接输出JSON不要任何解释。"
+        f"Game world name: {world_obj.get('world_name', '')}\n"
+        f"World conflict: {world_obj.get('fundamental_conflict', '')}\n\n"
+        f"Act list:\n{json.dumps(acts_summary, ensure_ascii=False)}\n\n"
+        f"NPC list:\n{json.dumps(npcs_summary, ensure_ascii=False)}\n\n"
+        f"Please generate the map JSON. Output JSON directly with no explanations."
     )
 
     system = _MAP_PROMPT.format(act_count=len(acts))
     raw = await asyncio.to_thread(map_client.chat_json, system, user)
+
+    # Build a lookup of exploration_spots per act_id from the world_bible
+    act_spots = {}
+    for act in acts:
+        aid = act.get("act_id")
+        spots = act.get("exploration_spots") or []
+        act_spots[aid] = [
+            {
+                "element_id": f"spot_{aid}_{i}",
+                "name": s.get("name", "Ruins"),
+                "description": s.get("description", ""),
+                "item_name": s.get("item_name", "Fragment"),
+                "item_description": s.get("item_description", ""),
+            }
+            for i, s in enumerate(spots)
+        ]
 
     # Normalize
     regions = raw.get("regions", [])
@@ -78,17 +94,20 @@ async def run_map(world_bible: dict, visual_style: str = "pixel_2d") -> dict:
     for i, r in enumerate(regions):
         if not isinstance(r, dict):
             continue
+        act_id = r.get("act_id") or i + 1
+        # Use director-defined exploration spots; fall back to map agent's explorable_elements
+        spots_for_region = act_spots.get(act_id) or r.get("explorable_elements") or []
         norm_regions.append({
             "region_id":           r.get("region_id") or f"r{i+1:03d}",
             "name":                r.get("name") or f"Region {i+1}",
-            "act_id":              r.get("act_id") or i + 1,
+            "act_id":              act_id,
             "area_type":           r.get("area_type") or "ruins",
             "terrain_description": r.get("terrain_description") or "",
             "atmosphere":          r.get("atmosphere") or "",
             "locked":              r.get("locked", i > 0),
             "unlock_condition":    r.get("unlock_condition") or ("start" if i == 0 else "previous_act_complete"),
             "npcs_here":           r.get("npcs_here") or [],
-            "explorable_elements": r.get("explorable_elements") or [],
+            "explorable_elements": spots_for_region,
             "connections":         r.get("connections") or [],
         })
 

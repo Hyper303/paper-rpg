@@ -5,32 +5,32 @@ from prompts import load_prompt
 director_client = LLMClient(provider="deepseek", model="deepseek-chat")
 
 _EXTRACT_PROMPT = """\
-你是RPG游戏世界设计师。根据以下论文分析，填写游戏设计JSON模板。
-直接输出JSON对象，不要任何解释文字，不要markdown代码块。
+You are an RPG game world designer. Based on the following paper analysis, fill in the game design JSON template.
+Output the JSON object directly — no explanatory text, no markdown code blocks.
 
-输出格式（严格按照此结构，不要增删字段）：
+Output format (strictly follow this structure — do not add or remove fields):
 {
   "world": {
-    "world_name": "游戏世界名称（2-4个字，有史诗感）",
-    "fundamental_conflict": "世界根本矛盾（把论文技术问题升华为世界危机，一句话）",
+    "world_name": "Game world name (2-4 words, epic in feel)",
+    "fundamental_conflict": "The world's fundamental conflict (elevate the paper's technical problem into a world-level crisis, one sentence)",
     "historical_timeline": [
-      {"era": "时代名", "reference_paper": "对应引用文献", "description": "历史描述"}
+      {"era": "Era name", "reference_paper": "Corresponding reference paper", "description": "Historical description"}
     ],
-    "current_crisis": "当前危机（2-3句，论文发表前的黑暗时刻）",
-    "victory_condition": "胜利条件（评估指标具象化，一句话）",
+    "current_crisis": "Current crisis (2-3 sentences, the dark moment before the paper was published)",
+    "victory_condition": "Victory condition (a concrete in-world description of the evaluation metric, one sentence)",
     "tone": "epic"
   },
   "narrative_type": "method",
   "acts": [
     {
       "act_id": 1,
-      "name": "章节名",
+      "name": "Act name",
       "paper_section": "Introduction",
-      "game_role": "世界观建立",
-      "area_name": "区域名",
+      "game_role": "World-building",
+      "area_name": "Region name",
       "area_type": "town",
-      "main_quest": "主线任务描述",
-      "side_quests": ["支线任务"],
+      "main_quest": "Main quest description",
+      "side_quests": ["Side quest"],
       "unlock_condition": "start"
     }
   ],
@@ -38,43 +38,43 @@ _EXTRACT_PROMPT = """\
     {
       "npc_id": "npc_001",
       "type": "A",
-      "name": "NPC名",
-      "real_reference": "对应真实论文/人物",
+      "name": "NPC name",
+      "real_reference": "Corresponding real paper/person",
       "location_act": 1,
-      "role_in_story": "故事角色",
-      "personality": "性格",
-      "knowledge_domain": "知识领域",
-      "quest_given": "给玩家的任务",
+      "role_in_story": "Story role",
+      "personality": "Personality",
+      "knowledge_domain": "Knowledge domain",
+      "quest_given": "Quest given to the player",
       "unlock_condition": "start"
     }
   ],
   "boss": {
-    "name": "Boss名",
-    "represents": "代表的旧方法/baseline",
+    "name": "Boss name",
+    "represents": "The old method/baseline the boss represents",
     "battle_mechanic": "combat",
-    "weakness": "论文核心创新点"
+    "weakness": "The paper's core innovation"
   },
   "author_npc": {
-    "name": "作者游戏名",
-    "personality": "性格",
+    "name": "Author's in-game name",
+    "personality": "Personality",
     "exam_questions": [
-      {"question": "考察问题", "difficulty": "intermediate", "key_concepts": ["概念"]}
+      {"question": "Exam question", "difficulty": "intermediate", "key_concepts": ["concept"]}
     ]
   },
   "map_hints": {
     "geography_type": "two_continents",
-    "special_landmark": "标志性地点"
+    "special_landmark": "Landmark location description"
   },
-  "freedom_notes": "设计说明"
+  "freedom_notes": "Design notes"
 }
 
-填写规则：
-- acts：4-8个，每个对应论文一个章节，第一个unlock_condition="start"，其余="previous_act_complete"
-- npcs：3-5个A类（引用文献作者）+ 3-4个B类（论文核心概念）+ 1个C类（论文作者）
-- C类NPC的unlock_condition="boss_defeated"
-- area_type只能是：town/ruins/temple/arena/forge/library/abyss
-- tone只能是：epic/mystery/adventure/philosophical
-- narrative_type只能是：method/theory/system/survey
+Fill-in rules:
+- acts: 4-8 entries, each corresponding to one section of the paper; first act has unlock_condition="start", rest have "previous_act_complete"
+- npcs: 3-5 Type A (reference paper authors) + 3-4 Type B (core paper concepts) + 1 Type C (paper author)
+- Type C NPC unlock_condition="boss_defeated"
+- area_type must be one of: town/ruins/temple/arena/forge/library/abyss
+- tone must be one of: epic/mystery/adventure/philosophical
+- narrative_type must be one of: method/theory/system/survey
 """
 
 
@@ -82,11 +82,11 @@ async def run_director(paper_text: str, questionnaire: dict) -> dict:
     system_prompt = load_prompt("director.txt")
 
     step1_user = (
-        f"玩家背景：{questionnaire['background']}，"
-        f"偏好：{questionnaire['preference']}，"
-        f"时间：{questionnaire['time']}，"
-        f"目标：{questionnaire['goal']}\n\n"
-        f"论文内容：\n{paper_text[:60000]}"
+        f"Player background: {questionnaire['background']}, "
+        f"preference: {questionnaire['preference']}, "
+        f"time: {questionnaire['time']}, "
+        f"goal: {questionnaire['goal']}\n\n"
+        f"Paper content:\n{paper_text[:60000]}"
     )
 
     # Step 1: free analysis (run in thread so it doesn't block the event loop)
@@ -99,7 +99,7 @@ async def run_director(paper_text: str, questionnaire: dict) -> dict:
     raw_text = await asyncio.to_thread(
         director_client.chat,
         _EXTRACT_PROMPT,
-        f"论文分析：\n{analysis[:8000]}\n\n请填写JSON模板，直接输出JSON。"
+        f"Paper analysis:\n{analysis[:8000]}\n\nPlease fill in the JSON template. Output JSON directly."
     )
     print(f"[director] step2 raw (first 300): {raw_text[:300]}")
     from models.llm_client import _extract_json

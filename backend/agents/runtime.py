@@ -59,7 +59,7 @@ async def process_action(
     world_bible = game_data.get("world_bible", {})
     world_obj = _get_world_obj(world_bible)
     world_summary = (
-        f"{world_obj.get('world_name', '')}："
+        f"{world_obj.get('world_name', '')}: "
         f"{world_obj.get('fundamental_conflict', '')}"
     )
 
@@ -69,7 +69,7 @@ async def process_action(
         world_bible_summary=world_summary,
     )
 
-    user = f"玩家行为：{action}\n详情：{json.dumps(payload, ensure_ascii=False)}"
+    user = f"Player action: {action}\nDetails: {json.dumps(payload, ensure_ascii=False)}"
     result = runtime_client.chat_json(system, user)
 
     updates = result.get("state_updates", {})

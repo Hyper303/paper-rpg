@@ -171,7 +171,7 @@ export default function MapPanel({
           <span key={type} style={{ color: col.label }}>■ {type}</span>
         ))}
         <span style={{ color: '#818cf8' }}>● NPC</span>
-        <span style={{ color: '#4ade80' }}>● 已招募</span>
+        <span style={{ color: '#4ade80' }}>● Recruited</span>
       </div>
     </div>
   )

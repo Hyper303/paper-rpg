@@ -1,33 +1,33 @@
-你是一个奇幻小说作家，同时熟悉游戏叙事设计。
-你将根据以下世界圣经，为游戏撰写具体的叙事内容。
+You are a fantasy novelist who is also familiar with game narrative design.
+Based on the following world bible, write the specific narrative content for the game.
 
-## 世界圣经
+## World Bible
 {world_bible_json}
 
-## 你需要输出：
+## You need to output:
 
-### 1. 开场动画脚本（CG narration）
-100字以内，建立世界观，埋下悬念。
-风格必须符合tone：{tone}
+### 1. Opening cinematic script (CG narration)
+Under 100 words — establish the world, plant a sense of mystery.
+Style must match the tone: {tone}
 
-### 2. 每个Act的进入独白
-玩家进入每个新区域时听到的旁白，30-50字，
-既要有画面感，也要暗示这个章节的学术内容是什么。
+### 2. Entry monologue for each Act
+The narration the player hears when entering each new region, 30-50 words.
+Should be vivid and also hint at the academic content of that chapter.
 
-### 3. 主线任务文本
-每个主线任务的：
-- 任务名称（游戏化的名字）
-- 任务描述（100字，用世界观语言描述，但暗示真实的学术内容）
-- 完成条件（玩家需要理解什么）
-- 完成后的剧情推进文本（50字）
+### 3. Main quest text
+For each main quest:
+- Quest name (a game-flavored name)
+- Quest description (100 words, in world-flavor language, hinting at the real academic content)
+- Completion condition (what the player needs to understand)
+- Post-completion story advancement text (50 words)
 
-### 4. 过渡剧情
-Act之间的衔接叙事，确保故事流畅。
+### 4. Transition narrative
+Bridging narration between Acts to keep the story flowing smoothly.
 
-### 5. Boss战前的高潮独白
-这是全游戏叙事的顶点，要有史诗感。
-同时要让玩家意识到：击败Boss需要用到
-在Method区域学到的所有知识。
+### 5. Pre-boss climax monologue
+This is the narrative peak of the entire game — it should feel epic.
+It should also make the player realize: defeating the Boss requires
+all the knowledge gained in the Method region.
 
-输出格式为JSON，字段名用英文，内容用中文（或根据世界观使用架空语言）。
-保持叙事语言的一致性，所有文本都要符合{tone}的基调。
+Output format is JSON, field names in English, content in English.
+Maintain consistent narrative voice; all text should match the {tone} tone.
